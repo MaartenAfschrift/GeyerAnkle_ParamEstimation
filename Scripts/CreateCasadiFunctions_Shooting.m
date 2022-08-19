@@ -12,8 +12,8 @@ clear all; close all; clc;
 
 %% settings
 % path to save the casadifiles
-MainPath    = 'C:\Users\u0088756\Documents\FWO\Software\GitProjects\Geyer_InverseID';
-OutPath     = fullfile(MainPath,'CasadiFuncs');
+MainPath    = 'C:\Users\Maarten\Documents\Software\Sim\GeyerAnkle_ParamEstimation';
+OutPath     = fullfile(MainPath,'Functions','CasadiFuncs');
 
 Sets =  {'GeyerDefault','GeyerDefault_Limited1','Geyer_COMd',...
 'Geyer_COMd_Limited2','Geyer_COMd_Limited1','Geyer_COMd_GRF',...
@@ -36,7 +36,7 @@ for iSet=1:length(Sets)
     shift       = getShift(ATendon);
     
     % path information    
-    ModelPath       = fullfile(MainPath,'Data','PredSim_Data_Antoine','gait_2D_Strength.osim');
+    ModelPath       = fullfile(MainPath,'osimModel','Models','gait_2D_Strength.osim');
     
     % get the muscle parameters
     MuscleNames = {'hamstrings_r','bifemsh_r','glut_max_r','iliopsoas_r',...
@@ -316,7 +316,7 @@ for iSet=1:length(Sets)
     % Tibialis anterior reflex
     eTib   = Tib.G.*(lM_t-Tib.loff);
     % combine excitations in one vector
-    eFB = [eSol; eTib];s
+    eFB = [eSol; eTib];
     % allow saturation of values between 0 and 1
     [eFB] = SaturateExcitation(eFB,15);
     % add baseline activity after saturation
@@ -426,6 +426,9 @@ for iSet=1:length(Sets)
     else
         f_Int1000_Stance_Full = Function('f_Int1000_Stance_Full',{OptReflex,x0,lMT,COMd_delay,dMs,Tid},{States,J,TMusV});
         f_Int1000_Stance_J = Function('f_Int1000_Stance_J',{OptReflex,x0,lMT,COMd_delay,dMs,Tid},{J});
+    end
+    if ~isfolder(OutPath)
+        mkdir(OutPath);
     end
     f_Int1000_Stance_Full.save(fullfile(OutPath,[Set.GainsEstimation 'f_Int1000_Stance_Full']));
     f_Int1000_Stance_J.save(fullfile(OutPath,[Set.GainsEstimation 'f_Int1000_Stance_J']));
@@ -567,9 +570,10 @@ for iSet=1:length(Sets)
         f_Int1000_Swing_J = Function('f_Int1000_Swing_J',{OptReflex,x0,lMT,dMs,Tid},{J});
     end
     f_Int1000_Swing_Full.save(fullfile(OutPath,[Set.GainsEstimation 'f_Int1000_Swing_Full']));
-    f_Int1000_Swing_J.save(fullfile(OutPath,[Set.GainsEstimation 'f_Int1000_Swing_J']));
+    f_Int1000_Swing_J.save(fullfile(OutPath,[Set.GainsEstimation 'f_Int1000_Swing_J']));    
     
-    clearvars -except iSet Sets
+    disp(['Create casadi functions finished for ' num2str(iSet) '/' num2str(length(Sets))]);
+    clearvars -except iSet Sets MainPath OutPath
 end
 
 %% save casadifunctions

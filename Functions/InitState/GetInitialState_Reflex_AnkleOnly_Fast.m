@@ -80,7 +80,7 @@ opti.minimize(J);
 
 % solve optimization problem
 optionssol.ipopt.nlp_scaling_method     = 'gradient-based';
-optionssol.ipopt.linear_solver          = 'ma57'; % you might have to use mumps if ma57 is not installed
+optionssol.ipopt.linear_solver          = 'mumps'; % you might have to use mumps if ma57 is not installed
 optionssol.ipopt.tol                    = 1e-5;
 optionssol.ipopt.max_iter               = 10000;
 optionssol.ipopt.print_level            = 0;
