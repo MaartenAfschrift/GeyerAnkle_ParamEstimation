@@ -5,13 +5,13 @@
 clear all; close all; clc;
 
 % path information
-Set.datapath        = 'D:\DataVlutters_Geyer_v3';    % path with data of Vlutters 2018 organized in format for parameter estimation
 Set.MainPath        = 'C:\Users\Maarten\Documents\Software\Sim\GeyerAnkle_ParamEstimation'; % Path to main folder of this repo
 
 % relative paths
 Set.PolyPath        = fullfile(Set.MainPath,'OsimModel\MuscleAnalysis');
 Set.ModelPath       = fullfile(Set.MainPath,'OsimModel\Models','gait_2D_Strength.osim');
-Set.ResultsFolder   = fullfile(Set.MainPath,'Results','IDResults_vTest');
+Set.ResultsFolder   = fullfile(Set.MainPath,'Results','ResParamID');
+Set.datapath        = fullfile(Set.MainPath,'Data');    % path with data of Vlutters 2018 organized in format for parameter estimation
 
 % add paths
 addpath(genpath(fullfile(Set.MainPath,'Functions')));
@@ -37,10 +37,10 @@ Set.MuscleNames = {'hamstrings_r','bifemsh_r','glut_max_r','iliopsoas_r',...
 % initial guess based on previous solution
 Set.PathIG = fullfile(pwd,'Reflex_AddHip.mat');
 
-% boolean to plot figures
+% boolean to plot figures during optimization
 Set.BoolPlot = 0;
 
-% scaling of the feedback gains
+% scale tohe optimizaton problem ?
 Set.ScaleGains = 1;
 
 % minimal e0 (reflex gain)
@@ -57,12 +57,12 @@ Set.qa_offset = 0.04; % in radians)
 % optimizize initial state as well ?
 Set.OptInitState = false;
 
-% Vlugt
+% Vlugt (covariance analysis of optimization parameters)
 Set.Vlugt2010 = false;
 Set.PlotVlugt = false;
 
-% constant "band around COM data"
-Set.ConstantSTD = true;
+% constant "band around COM data" to detect deviation in COM movement
+Set.ConstantSTD = true; % based on STD unperturbed walking
 Set.COMref_std = 0.04; % 2 cm deviation from average
 Set.COMdref_std = 0.06; % 6 cm/s deviation in COM velocity from average
 Set.COMddref_std = 0.01; % 1cm/s2 deviation in COM acceleration from average
@@ -71,7 +71,7 @@ Set.COMddref_std = 0.01; % 1cm/s2 deviation in COM acceleration from average
 Set.COMfb = 1;
 Set.COM_std = false;
 Set.PercGaitCycle = true;
-Set.COM_TimeDelay = 0.03;
+Set.COM_TimeDelay = 0.06; % time delay COM feedback [s]
 
 % create results directory
 if ~isfolder(Set.ResultsFolder)
@@ -86,34 +86,52 @@ Height  = [1.79 1.92 1.62 1.82 1.80 1.94 1.89 1.73 1.78 1.70];
 % scale torque to reference person
 Set.ScaleTroque = true;
 
+% download the dataset if needed
+if ~isfolder(Set.datapath)
+    Set.datapath = GetDataVlutters2018();
+end
 
 %% Create a Batch for simulations
+% 
 
-% --- example all analysis used in paper
+% Batch with all the results of the paper
 % Slow = slow walking (0.62 m/s) and fast is normal walking speed (1.25m/s)
-Batch.Speeds ={'Slow','Slow','Slow','Fast','Fast','Fast',...
-    'Slow','Slow','Slow','Slow',...
-    'Fast','Fast','Fast','Fast',...
-    'Slow','Fast'};
+Batch.Speeds ={'Slow','Slow'};
 % 1->4: backward increasing magnitude   5->8: forward increasing magnitude
-Batch.iPertSel={1:8,1:4,5:8,1:8,1:4,5:8,...
-    1:2,3:4,6:7,7:8,...
-    1:2,3:4,6:7,7:8,...
-    [1 2 4 5 6 8],[1 2 4 5 6 8]};
-Batch.nUnpSel = {8,8,8,8,8,8,...
-    4,4,4,4,...
-    4,4,4,4,...
-    8,8}; % number of unperturbed gait cycles
-Batch.nP = {2,2,2,2,2,2,...
-    3,3,3,3,...
-    3,3,3,3,...
-    2,2};      % number of perturbed gait cycles
+Batch.iPertSel={1:8,...
+    [1 2 4 5 6 8]};
+Batch.nUnpSel = {8,8}; % number of unperturbed gait cycles
+Batch.nP = {2,2};      % number of perturbed gait cycles
 
-Batch.OutNames = {'Slow_AllDir_AllMag','Slow_Backward_AllMag','Slow_Forward_AllMag',...
-    'Fast_AllDir_AllMag','Fast_Backward_AllMag','Fast_Forward_AllMag',...
-    'Slow_AllDir_Mag12','Slow_AllDir_Mag34','Slow_AllDir_Mag56','Slow_AllDir_Mag78',...
-    'Fast_AllDir_Mag12','Fast_AllDir_Mag34','Fast_AllDir_Mag56','Fast_AllDir_Mag78',...
-    'Slow_Valid_Excl37','Fast_Valid_Excl37'};
+Batch.OutNames = {'Slow_AllDir_AllMag',...
+    'Slow_Valid_Excl37'};
+
+
+% % --- example of a batch with a hughe set of analysis
+% % Slow = slow walking (0.62 m/s) and fast is normal walking speed (1.25m/s)
+% Batch.Speeds ={'Slow','Slow','Slow','Fast','Fast','Fast',...
+%     'Slow','Slow','Slow','Slow',...
+%     'Fast','Fast','Fast','Fast',...
+%     'Slow','Fast'};
+% % 1->4: backward increasing magnitude   5->8: forward increasing magnitude
+% Batch.iPertSel={1:8,1:4,5:8,1:8,1:4,5:8,...
+%     1:2,3:4,6:7,7:8,...
+%     1:2,3:4,6:7,7:8,...
+%     [1 2 4 5 6 8],[1 2 4 5 6 8]};
+% Batch.nUnpSel = {8,8,8,8,8,8,...
+%     4,4,4,4,...
+%     4,4,4,4,...
+%     8,8}; % number of unperturbed gait cycles
+% Batch.nP = {2,2,2,2,2,2,...
+%     3,3,3,3,...
+%     3,3,3,3,...
+%     2,2};      % number of perturbed gait cycles
+% 
+% Batch.OutNames = {'Slow_AllDir_AllMag','Slow_Backward_AllMag','Slow_Forward_AllMag',...
+%     'Fast_AllDir_AllMag','Fast_Backward_AllMag','Fast_Forward_AllMag',...
+%     'Slow_AllDir_Mag12','Slow_AllDir_Mag34','Slow_AllDir_Mag56','Slow_AllDir_Mag78',...
+%     'Fast_AllDir_Mag12','Fast_AllDir_Mag34','Fast_AllDir_Mag56','Fast_AllDir_Mag78',...
+%     'Slow_Valid_Excl37','Fast_Valid_Excl37'};
 
 % % -- minimal example
 % Batch.Speeds ={'Slow'};
@@ -129,9 +147,8 @@ Batch.OutNames = {'Slow_AllDir_AllMag','Slow_Backward_AllMag','Slow_Forward_AllM
 
 % number of batches
 Batch.N = length(Batch.Speeds);                   % number of batches
-
 Batch.SubjError = zeros(10,Batch.N);
-SetO = Set;
+SetO = Set; % copy of original settings
 
 % check if the casadifunctions are compiled 
 if ~isfolder(fullfile(Set.MainPath,'Functions','CasadiFuncs')) || ...
@@ -250,32 +267,6 @@ for ib = 1:Batch.N
         Set.diaryName       = fullfile(Set.ResultsFolder,['COMfb_' Set.OutName_Gen '_s_' num2str(s) '.txt']);
         Set.Sol.e0          = 0.02;
         [All_GeyerCOM_GRF_lim]  = GainEstimation_AnkleOnly_nCycl_Shooting_vTwente(CombDatSel,Set,RefCycles);
-
-%         %% Plot Main Results
-%         h1 = figure();
-%         set(h1,'Position',[680          89         788        1191]);
-%         for i=1:length(CombDatSel)
-%             subplot(ceil(length(CombDatSel)/2),2,i);
-% 
-%             % default geyer model shooting
-%             iSel = All_GeyerDefault.iDatSet(i)+1:All_GeyerDefault.iDatSet(i+1);
-%             plot(All_GeyerDefault.t(iSel),full(All_GeyerDefault.Tmus(iSel)),'r'); hold on;
-% 
-%             % COM geyer model shooting
-%             iSel = All_GeyerCOM.iDatSet(i)+1:All_GeyerCOM.iDatSet(i+1);
-%             plot(All_GeyerCOM.t(iSel),full(All_GeyerCOM.Tmus(iSel)),'b'); hold on;
-% 
-%             % COM geyer GRF model shooting
-%             iSel = All_GeyerCOM_GRF.iDatSet(i)+1:All_GeyerCOM_GRF.iDatSet(i+1);
-%             plot(All_GeyerCOM_GRF.t(iSel),full(All_GeyerCOM_GRF.Tmus(iSel)),'g'); hold on;
-% 
-%             % ID moment
-%             plot(All_GeyerCOM.t(iSel), All_GeyerCOM.Tid(iSel),'--k');
-% 
-%             ylabel('Ankle moment [Nm]');
-%             set(gca,'YLim',[-100 30]);
-%         end
-%         legend('DefaultGeyer','Geyer COM','Geyer COM GRF','Tid');
 
         %% save results
         save(fullfile(Set.ResultsFolder,[Set.OutName_Gen '_s_' num2str(s) '.mat']),...

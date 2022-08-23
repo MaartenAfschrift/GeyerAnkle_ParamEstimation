@@ -107,10 +107,10 @@ set(legend1,...
 
 subplot(1,3,1)
 ylabel('Ankle Moment');
-title('Default Geyer');
+title('Neuromuscular controller');
 
 subplot(1,3,2)
-title('COMd-GRF');
+title('Neuromuscular controller COM');
 
 subplot(1,3,3)
 title('Experiment');

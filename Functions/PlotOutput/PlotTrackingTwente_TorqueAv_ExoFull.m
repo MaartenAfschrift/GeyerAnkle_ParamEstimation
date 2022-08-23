@@ -103,14 +103,14 @@ plot(AllDat(:,1,3),'Color',Cols(1,:),'LineWidth',lw*2); hold on;
 set(gca,'YLim',[-100 50]);
 set(gca,'YTick',[-100 -50 0 50]);
 
-% delta torque experiment
+% torque experiment
 subplot(1,3,2);
-plot(AllDat(:,1,3) - AllDat(:,1,3),'Color',Cols(1,:),'LineWidth',lw*2); hold on;
+plot(AllDat(:,1,3),'Color',Cols(1,:),'LineWidth',lw*2); hold on;
 for j=2:length(iP_Unique)
-    plot(AllDat(:,j,3) - AllDat(:,1,3),'Color',Cols(j,:),'LineWidth',lw); hold on;
+    plot(AllDat(:,j,3),'Color',Cols(j,:),'LineWidth',lw); hold on;
 end
-set(gca,'YLim',[-100 100]);
-set(gca,'YTick',[-100 -50 0 50 100]);
+set(gca,'YLim',[-100 50]);
+set(gca,'YTick',[-100 -50 0 50]);
 
 % exoskeleton controller
 subplot(1,3,3);
@@ -137,7 +137,7 @@ ylabel('Ankle Moment [Nm]');
 title('Experiment');
 
 subplot(1,3,2)
-ylabel('\Delta Ankle Moment [Nm]');
+ylabel('Ankle Moment [Nm]');
 title('Experiment');
 
 subplot(1,3,3)

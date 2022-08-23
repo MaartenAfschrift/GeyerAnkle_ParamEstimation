@@ -17,9 +17,9 @@ if ~isempty(varargin)
 end
 
 %% Color selection
-ColGeyer = [37, 186, 124]./251;
+ColGeyer = [176, 18, 52]./251;
 ColCOMd = [32, 61, 179]./251;
-ColGRF = [176, 18, 52]./251;
+ColGRF = [37, 186, 124]./251;
 lw = 1.5;
 
 

@@ -1,6 +1,6 @@
 function [ForwardSim] = ForwardSim_GeyerModel_Explicit_AnkleOnly_vTwente(Data,Set,Reflex,varargin)
-%UNTITLED2 Summary of this function goes here
-%   Detailed explanation goes here
+%ForwardSim_GeyerModel_Explicit_AnkleOnly_vTwente Runs a forward simulation
+% with the Geyer model using a ode23s integrator
 
 
 if ~isempty(varargin)

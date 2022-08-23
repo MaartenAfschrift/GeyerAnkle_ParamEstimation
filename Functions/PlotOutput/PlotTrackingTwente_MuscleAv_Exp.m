@@ -3,7 +3,8 @@ function [h1] = PlotTrackingTwente_MuscleAv_Exp(datafile,RefWalk,PertWalk,nUnp,n
 %   Detailed explanation goes here
 
 %% Load the data
-load(datafile);
+load(datafile,'All_GeyerDefault','All_GeyerCOM','FileInfo','TrialInfo',...
+    'All_GeyerCOM_GRF');
 
 %% headers for subplots
 HeadersSubplot = [];
@@ -126,9 +127,9 @@ set(legend1,...
 
 subplot(2,3,1)
 ylabel('Soleus activity []');
-title('Default Geyer');
+title('Neuromuscular controller');
 subplot(2,3,2)
-title('COMd-GRF');
+title('Neuromuscular controller COM');
 subplot(2,3,3)
 title('EMG ');
 ylabel('Gastrocn. EMG []');

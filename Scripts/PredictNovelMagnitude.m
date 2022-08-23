@@ -7,10 +7,10 @@
 clear all; clc;
 % path information
 MainPath        = 'C:\Users\Maarten\Documents\Software\Sim\GeyerAnkle_ParamEstimation';
-resultfolder    = fullfile(MainPath,'Results','ID_Twente','ID_COMdd_Fix_v2');
+resultfolder    = fullfile(MainPath,'Results','ResParamID');
 datapath        = 'D:\DataGeyerID';    % path with data of Vlutters 2018 organized in format for parameter estimation
 
-
+% path the folders with model
 PolyPath        = fullfile(MainPath,'OsimModel\MuscleAnalysis');
 ModelPath       = fullfile(MainPath,'OsimModel\Models','gait_2D_Strength.osim');
 
@@ -18,7 +18,10 @@ ModelPath       = fullfile(MainPath,'OsimModel\Models','gait_2D_Strength.osim');
 % load the batch (structure with all simulations)
 load(fullfile(resultfolder,'Batch.mat'),'Batch','Set');
 
-Validations = {'Slow_Valid_Excl37','Fast_Valid_Excl37'};
+% select results structure with identified feedback gains (see Batch.OutNames)
+% in the script ParamEst_PelvisPerturb_Shooting
+% Validations = {'Slow_Valid_Excl37','Fast_Valid_Excl37'};
+Validations = {'Slow_Valid_Excl37'};
 
 
 % Run forward simulation
@@ -33,7 +36,7 @@ for ibn = 1:length(Validations)
                 'All_GeyerCOM','All_GeyerDefault','All_GeyerCOM_GRF','FileInfo',...
                 'All_GeyerCOM_GRF_lim','TrialInfo');
         
-        Set = All_GeyerCOM_GRF_lim.Set;
+        Set = All_GeyerCOM_GRF.Set;
         Set.OutName_Gen = Batch.OutNames{ib};
         Set.WalkSpeed = Batch.Speeds{ib}; % walking speed
         Set.iPertSel = [3 7];
