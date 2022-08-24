@@ -8,9 +8,11 @@ clear all; close all; clc;
 
 %% Path information
 
-MainPath = 'C:\Users\Maarten\Documents\Software\Sim\GeyerAnkle_ParamEstimation';
+MainPath = 'C:\Users\mat950\Documents\Software\Sim\GeyerAnkle_ParamEstimation';
+
+% relative paths
 datapath = fullfile(MainPath,'\Results\ResParamID');
-DataVlutters = 'D:\DataVlutters';
+DataVlutters = fullfile(MainPath,'Data');
 
 figPath = fullfile(MainPath,'figs','google_docs');
 if ~isfolder(figPath)
@@ -18,9 +20,11 @@ if ~isfolder(figPath)
 end
 
 %% Layout settings
-ColGeyer = [37, 186, 124]./251;
-ColCOMd = [32, 61, 179]./251;
-ColGRF = [176, 18, 52]./251;
+
+ColsTemp = linspecer(4);
+ColGeyer = ColsTemp(2,:);
+ColGRF = ColsTemp(3,:);
+ColCOMd = [0.3, 0.3, 0.8];
 
 %% Read all the data
 % results from ParamEst_PelvisPerturb_Shooting.m
@@ -71,12 +75,13 @@ for ib = 1:Batch.N
         JGRF(ib,s) = sum(abs(All_GeyerCOM_GRF.J))/length(All_GeyerCOM_GRF.J);
         JGRF_lim(ib,s) = sum(abs(All_GeyerCOM_GRF_lim.J))/length(All_GeyerCOM_GRF_lim.J);
         % get the tracking error
-        [TrackError_Geyer_Unp(ib,s), TrackError_Geyer(ib,s)] = ComputeTrackingError_Twente(All_GeyerDefault,Batch.nUnpSel{ib});
-        [TrackError_COM_Unp(ib,s), TrackError_COM(ib,s)] = ...
+        [TrackError_Geyer_Unp(ib,s), TrackError_Geyer(ib,s), TrackError_Geyer_Push(ib,s), TrackError_Geyer_Pull(ib,s)] = ...
+            ComputeTrackingError_Twente(All_GeyerDefault,Batch.nUnpSel{ib});
+        [TrackError_COM_Unp(ib,s), TrackError_COM(ib,s), TrackError_COM_Push(ib,s), TrackError_COM_Pull(ib,s)] = ...
             ComputeTrackingError_Twente(All_GeyerCOM,Batch.nUnpSel{ib});
-        [TrackError_GRF_Unp(ib,s), TrackError_GRF(ib,s)] = ...
+        [TrackError_GRF_Unp(ib,s), TrackError_GRF(ib,s), TrackError_GRF_Push(ib,s), TrackError_GRF_Pull(ib,s)] = ...
             ComputeTrackingError_Twente(All_GeyerCOM_GRF,Batch.nUnpSel{ib});
-        [TrackError_GRF_Unp_lim(ib,s), TrackError_GRF_lim(ib,s)] = ...
+        [TrackError_GRF_Unp_lim(ib,s), TrackError_GRF_lim(ib,s), TrackError_GRF_lim_Push(ib,s), TrackError_GRF_lim_Pull(ib,s)] = ...
             ComputeTrackingError_Twente(All_GeyerCOM_GRF_lim,Batch.nUnpSel{ib});
 
     end
@@ -113,7 +118,7 @@ end
 
 disp('Feedback gains used in controller: ');
 iBatch = strcmp(Batch.OutNames,'Slow_AllDir_AllMag');
-gains = squeeze(ReflexGRF_lim(iBatch,2,:));
+gains = squeeze(ReflexGRF(iBatch,1,:));
 Reflex_All_Headers = {'Sol e0','Sol G','Tib e0', 'Tib G','Tib loff','Tib Gsol','Sol COMd','Tib COMd'};
 
 for i=1:length(Reflex_All_Headers)
@@ -192,28 +197,6 @@ saveas(gcf,fullfile(figPath,'Figure1Paper.svg'),'svg');
 
 
 
-%% Figure to visualise all trials included in parameter estimation
-% this figure is not included in the paper, but gives a good overview of
-% the different trials that were included in the paper. you can also change
-% the subject ID if you want to select you own "representative" subject.
-
-% name of optimization
-NameBatchSel = 'Slow_AllDir_AllMag';
-% select index in batch structure
-iBatch = strcmp(Batch.OutNames,NameBatchSel); 
-% select subject
-SubjSel = 4; %
-% path to selected datafile
-datafile = fullfile(datapath,[NameBatchSel '_s_' num2str(SubjSel) '.mat']);
-% plot tracking of moment as a functin of time
-HeaderSubPlot = {'Unperturbed walking at 0.62 m/s','Pull 1','Pull 2','Pull 3','Pull 4',...
-   'Push 1','Push 2','Push 3','Push 4'};
-[h1] = PlotTrackingTwente(datafile,Batch.nUnpSel{iBatch},Batch.nP{iBatch},...
-    Batch.iPertSel{iBatch},HeaderSubPlot);
-
-saveas(gcf,fullfile(figPath,'AllTrialsParamEst.png'),'png');
-saveas(gcf,fullfile(figPath,'AllTrialsParamEst.svg'),'svg');
-
 
 %% Summary controller behavior and experiment (joint torque)
 %----------------------------------------------------------
@@ -237,7 +220,7 @@ saveas(gcf,fullfile(figPath,'Figure1_Torque.fig'),'fig');
 
 
 
-%% Figure with predicted and measured muscle responses
+%% Appendix: Figure with predicted and measured muscle responses
 %----------------------------------------
 
 % name of optimization
@@ -253,11 +236,148 @@ HeaderSubPlot = {'Unperturbed','Pull 1','Pull 2','Pull 3','Pull 4',...
    'Push 1','Push 2','Push 3','Push 4'};
 
 % load muscle activity - mat file with raw data
-Set.datapath = [DataVlutters '\DataFiles_HSAdapt'];
 Set.SubjName = ['pp_' num2str(SubjSel)];
-load(fullfile(Set.datapath,Set.SubjName,'PertWalk.mat'),'PertWalk');
-load(fullfile(Set.datapath,Set.SubjName,'RefWalk.mat'),'RefWalk','headers');
+load(fullfile(DataVlutters,Set.SubjName,'PertWalk.mat'),'PertWalk');
+load(fullfile(DataVlutters,Set.SubjName,'RefWalk.mat'),'RefWalk','headers');
 % plot activity
 [h1] = PlotTrackingTwente_MuscleAv_Exp(datafile,RefWalk,PertWalk,...
     Batch.nUnpSel{iBatch},Batch.nP{iBatch},Batch.iPertSel{iBatch},HeaderSubPlot);
 
+
+%% Appendix figure to visualise all trials included in parameter estimation
+% this figure is not included in the paper, but gives a good overview of
+% the different trials that were included in the paper. you can also change
+% the subject ID if you want to select you own "representative" subject.
+set(0, 'DefaultFigureRenderer', 'opengl');
+
+% name of optimization
+NameBatchSel = 'Slow_AllDir_AllMag';
+% select index in batch structure
+iBatch = strcmp(Batch.OutNames,NameBatchSel); 
+% select subject
+SubjSel = 4; %
+% path to selected datafile
+datafile = fullfile(datapath,[NameBatchSel '_s_' num2str(SubjSel) '.mat']);
+% plot tracking of moment as a functin of time
+HeaderSubPlot = {'Unperturbed','Pull 4%','Pull 8%','Pull 12%','Pull 16%',...
+   'Push 4%','Push 8%','Push 12%','Push 16%'};
+[h1] = PlotTrackingTwente(datafile,Batch.nUnpSel{iBatch},Batch.nP{iBatch},...
+    Batch.iPertSel{iBatch},HeaderSubPlot);
+
+saveas(gcf,fullfile(figPath,'AllTrialsParamEst.png'),'png');
+saveas(gcf,fullfile(figPath,'AllTrialsParamEst.svg'),'svg');
+
+set(0, 'DefaultFigureRenderer', 'painters');
+
+
+%% Appendix: Smooth transition stance and swing phase
+
+NameBatchSel = 'Slow_AllDir_AllMag';
+% select index in batch structure
+iBatch = strcmp(Batch.OutNames,NameBatchSel); 
+% select subject
+SubjSel = 5; %
+% path to selected datafile
+datafile = fullfile(datapath,[NameBatchSel '_s_' num2str(SubjSel) '.mat']);
+% load datafile
+D = load(datafile);
+% layout
+lw = 2;
+ColNoGRF = [0.3 0.3 0.8];
+% Plot some unperturbed gait cycles
+figure();
+set(gcf,'Position',[196.3333  708.3333  915.6667  298.6667]);
+subplot(1,5,1:3);
+
+% get an unperturbed gait cycle
+iUnp = D.FileInfo == 0;
+iUnp = iUnp(5);
+
+% plot the inverse dynamic moment
+Set = D.All_GeyerCOM.Set;
+if isfield(Set,'ScaleTroque') && Set.ScaleTroque
+    Tid = D.All_GeyerCOM.Tid./(Set.BodyMass*Set.Height).*(70*1.75);
+else
+    Tid = D.All_GeyerCOM.Tid;
+end
+plot(D.All_GeyerCOM.t(iSel(1:end-1)), Tid(iSel(1:end-1)),'--k','LineWidth',lw); hold on;
+
+% plot model simulation with or without smooth transition
+iSel = D.All_GeyerCOM.iDatSet(iUnp)+1:D.All_GeyerCOM.iDatSet(iUnp+1);
+plot(D.All_GeyerCOM.t(iSel),full(D.All_GeyerCOM.Tmus(iSel)),'Color',ColNoGRF,'LineWidth',lw); hold on;
+iSel = D.All_GeyerCOM_GRF.iDatSet(iUnp)+1:D.All_GeyerCOM_GRF.iDatSet(iUnp+1);
+plot(D.All_GeyerCOM_GRF.t(iSel),full(D.All_GeyerCOM_GRF.Tmus(iSel)),'Color',ColGeyer,'LineWidth',lw); hold on;
+legend('Inverse dynamics', 'Model discrete transition gains', 'Model smooth transition');
+xlabel('Time [s]');
+ylabel('Ankle moment [Nm]');
+
+% plot the average tracking error in all subjects
+subplot(1,5,4)
+PlotBar(4,TrackError_COM_Unp(iBatch,:),ColNoGRF); hold on;
+PlotBar(5, TrackError_GRF_Unp_lim(iBatch,:),ColGeyer);
+ylabel('RMSE [Nm]')
+title('Unperturbed')
+subplot(1,5,5)
+PlotBar(1,TrackError_COM(iBatch,:),ColNoGRF); hold on;
+PlotBar(2, TrackError_GRF_lim(iBatch,:),ColGeyer)
+ylabel('RMSE [Nm]')
+title('Perturbed')
+
+% adapt the 
+iPlt = {1:3,4,5};
+for i=1:length(iPlt)
+    subplot(1,5,iPlt{i})
+    set(gca,'box','off');
+    set(gca,'LineWidth',1.4);
+    set(gca,'FontSize',12);
+end
+
+%% Appendix Added model without smooth transition in the overview figure
+% this figure is not included in the paper, but gives a good overview of
+% the different trials that were included in the paper. you can also change
+% the subject ID if you want to select you own "representative" subject.
+set(0, 'DefaultFigureRenderer', 'opengl');
+
+% name of optimization
+NameBatchSel = 'Slow_AllDir_AllMag';
+% select index in batch structure
+iBatch = strcmp(Batch.OutNames,NameBatchSel); 
+% select subject
+SubjSel = 5; %
+% path to selected datafile
+datafile = fullfile(datapath,[NameBatchSel '_s_' num2str(SubjSel) '.mat']);
+% plot tracking of moment as a functin of time
+HeaderSubPlot = {'Unperturbed','Pull 4%','Pull 8%','Pull 12%','Pull 16%',...
+   'Push 4%','Push 8%','Push 12%','Push 16%'};
+[h1] = PlotTrackingTwente_vSmoothTransition(datafile,Batch.nUnpSel{iBatch},Batch.nP{iBatch},...
+    Batch.iPertSel{iBatch},HeaderSubPlot);
+
+%% Appendix figure direction independent gains
+
+NamesSel = {'Slow_AllDir_AllMag','Slow_AllDir_Mag34','Slow_AllDir_Mag78'};
+figure();
+
+subplot(1,2,1)
+iBatch = strcmp(Batch.OutNames,'Slow_AllDir_AllMag');
+PlotBar(1,TrackError_GRF_Pull(iBatch,:),ColGRF);
+iBatch = strcmp(Batch.OutNames,'Slow_AllDir_Mag34');
+PlotBar(2,TrackError_GRF_Pull(iBatch,:),[0.6 0.6 0.6]);
+title('pull perturbations')
+
+subplot(1,2,2)
+iBatch = strcmp(Batch.OutNames,'Slow_AllDir_AllMag');
+PlotBar(1,TrackError_GRF_Push(iBatch,:),ColGRF);
+iBatch = strcmp(Batch.OutNames,'Slow_AllDir_Mag78');
+PlotBar(2,TrackError_GRF_Push(iBatch,:),[0.6 0.6 0.6]);
+title('push perturbations')
+
+for i=1:2
+    subplot(1,2,i)
+    ylabel('RMSE []');
+    set(gca,'box','off');
+    set(gca,'LineWidth',1.4);
+    set(gca,'FontSize',12);
+    set(gca,'XTick',[]);
+end
+set(gcf,'Position',[275.0000  802.3333  837.0000  204.6667]);
+saveas(gcf,fullfile(figPath,'AppendixDirDepGains.svg'),'svg');

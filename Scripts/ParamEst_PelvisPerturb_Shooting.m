@@ -46,11 +46,6 @@ Set.ScaleGains = 1;
 % minimal e0 (reflex gain)
 Set.e0_min = 0.02;
 
-% Gradient change force feedback between heelstrike contra-lateral leg and
-% toe-off event (i.e. during double support)
-Set.BoolGradientDS = false;
-Set.G_gradient = -6;
-
 % offset in ankle angle
 Set.qa_offset = 0.04; % in radians)
 

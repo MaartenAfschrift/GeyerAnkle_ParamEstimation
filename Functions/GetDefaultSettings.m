@@ -49,7 +49,7 @@ if ~isfield(Set,'MuscleNames')
     'rect_fem_r','vasti_r','gastroc_r','soleus_r','tib_ant_r'};
 end
 
-% inequality constraint on feedback gains
+% inequality constraint on feedback gains (in direct collocation implementation)
 if ~isfield(Set,'FB_ineq')
     % Bounds on inequality constraint feedback law
     Set.FB_ineq = 10^-4;
@@ -75,11 +75,6 @@ else
     if ~isfield(Set.Weight,'PertPost')
         Set.Weight.PertPost = 1;
     end
-end
-
-% inequality constraint on feedback law
-if ~isfield(Set,'FB_ineq')
-    Set.FB_ineq = 10^-4;
 end
 
 % plot Temp results
@@ -112,16 +107,16 @@ end
 % time delay for COM feedback
 if ~isfield(Set,'COM_TimeDelay')
     % default time delay COM feebdack in ms
-    Set.COM_TimeDelay = 0.05;
+    Set.COM_TimeDelay = 0.06;
 end
 
 if ~isfield(Set,'BoolGradientDS')
     Set.BoolGradientDS = true;
 end
 
-% smooth transition between Single stance and DS
+% smooth transition between Single stance and DS (old implementation)
 if ~isfield(Set,'G_gradient')
-    Set.G_gradient = -10;
+    Set.G_gradient = -6;
 end
 
 % Normalised tendon stiffness

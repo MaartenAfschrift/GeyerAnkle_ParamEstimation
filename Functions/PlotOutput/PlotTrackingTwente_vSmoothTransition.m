@@ -65,10 +65,10 @@ for i=1:nPhase
         % plot the tracking
         iSel = All_GeyerDefault.iDatSet(i)+1:All_GeyerDefault.iDatSet(i+1);
         plot(All_GeyerDefault.t(iSel) + t0,full(All_GeyerDefault.Tmus(iSel)),'Color',ColGeyer,'LineWidth',lw); hold on;
-        
+
         % COM geyer model shooting
-        %     iSel = All_GeyerCOM.iDatSet(i)+1:All_GeyerCOM.iDatSet(i+1);
-        %     plot(All_GeyerCOM.t(iSel) + t0,full(All_GeyerCOM.Tmus(iSel)),'Color',ColCOMd,'LineWidth',lw);
+        iSel = All_GeyerCOM.iDatSet(i)+1:All_GeyerCOM.iDatSet(i+1);
+        plot(All_GeyerCOM.t(iSel) + t0,full(All_GeyerCOM.Tmus(iSel)),'Color',ColCOMd,'LineWidth',lw);
 
         % COM geyer GRF model shooting
         iSel = All_GeyerCOM_GRF.iDatSet(i)+1:All_GeyerCOM_GRF.iDatSet(i+1);
@@ -111,8 +111,8 @@ end
 
 
 
-% legend1 = legend({'DefaultGeyer','COMd','COMd-GRF','Tid'},'Orientation','horizontal');
-legend1 = legend({'DefaultGeyer','COMd-GRF','Tid'},'Orientation','horizontal');
+legend1 = legend({'DefaultGeyer','Discrete transition','Controller with COM','Tid'},'Orientation','horizontal');
+% legend1 = legend({'DefaultGeyer','COMd-GRF','Tid'},'Orientation','horizontal');
 set(legend1,...
     'Position',[0.340837295523347 0.950531197903314 0.342880518488135 0.018518518082812],...
     'Orientation','horizontal',...

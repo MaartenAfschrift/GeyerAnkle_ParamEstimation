@@ -6,9 +6,9 @@
 
 clear all; clc;
 % path information
-MainPath        = 'C:\Users\Maarten\Documents\Software\Sim\GeyerAnkle_ParamEstimation';
+MainPath        = 'C:\Users\mat950\Documents\Software\Sim\GeyerAnkle_ParamEstimation';
 resultfolder    = fullfile(MainPath,'Results','ResParamID');
-datapath        = 'D:\DataGeyerID';    % path with data of Vlutters 2018 organized in format for parameter estimation
+datapath        = fullfile(MainPath,'Data');    % path with data of Vlutters 2018 organized in format for parameter estimation
 
 % path the folders with model
 PolyPath        = fullfile(MainPath,'OsimModel\MuscleAnalysis');
