@@ -273,6 +273,7 @@ TidV                = nan(Ntot,1);
 tV                  = nan(Ntot,1);
 % loop over all datasets (nDatSets) and gait phases in a dataset(nPhase)
 ctx = 1;
+IndexNewSim = 1:nDatSets;
 for np =1:nDatSets
     nPhase = PhaseDat(np).nPhase;
     iDatSet(np,1) = ctx;
@@ -283,6 +284,7 @@ for np =1:nDatSets
                 ctx = ctx+1;
             end
             States(:,ctx) = x0(:,np);
+            IndexNewSim(np) = ctx;
         end
         
         % index of gait cycle (1) stance, (2) DS pre-sing (0) swing
@@ -398,15 +400,16 @@ f_ForwardSim = Function('f_ForwardSim',{OptReflex,x0},...
 f_ForwardSim_J = Function('f_ForwardSim_J',{OptReflex,x0},...
     {J},{'OptReflex','x0'},{'J'});
 
-% assign NLP problem to multiple cores (not implemented yet, could be a major improvement)
-% the idea would be to run the forward simultion (of the differt sets of gait cycles)
-% on multiple cores
-% f_coll_map = f_ForwardSim.map(N,'thread',3);
-% [coll_eq_constr, coll_ineq_constr, Jall] = f_coll_map(tf,...
-%     a(:,1:end-1), a_col, FTtilde(:,1:end-1), FTtilde_col, Qs(:,1:end-1), ...
-%     Qs_col, Qdots(:,1:end-1), Qdots_col, a_a(:,1:end-1), a_a_col, ...
-%     a_mtp(:,1:end-1), a_mtp_col, vA, e_a, e_mtp, dFTtilde_col, A_col,ExoVect);
-% 
+% f_coll_map = f_ForwardSim.map(1,'thread',3);
+if isfield(Set,'ParComp') && Set.ParComp
+    if ~isfield(Set,'nCores')
+        Set.nCores = 4;
+    end
+    f_coll_map_J = f_ForwardSim_J.map(1,'thread',Set.nCores);
+else
+    Set.ParComp =  false;
+end
+
 
 % initial guess reflex gains
 if ~isempty(Set.ReflexGuess)
@@ -529,7 +532,11 @@ end
 opti.set_initial(OptReflexO,IG_Reflexes);
 
 % expression for the objective function
-J = f_ForwardSim_J(OptReflexO,x0);
+if Set.ParComp
+    J = f_coll_map_J(OptReflexO,x0);
+else
+    J = f_ForwardSim_J(OptReflexO,x0);
+end
 
 % minimize the feedback gains as well (regularisation)
 JGeyer = sumsqr(OptReflexO).*0.00001;
@@ -574,6 +581,10 @@ optionssol.ipopt.nlp_scaling_method     = 'gradient-based';
 optionssol.ipopt.linear_solver          = 'mumps';
 optionssol.ipopt.tol                    = 1e-4;
 optionssol.ipopt.max_iter               = 2000;
+% optionssol.jit = true;
+% optionssol.compiler = 'shell';
+% optionssol.jit_options.verbose = true;
+% optionssol.jit_options.flags = {'/O2'};
 [w_opt, stats,lbx,ubx,llb,uub] = solve_NLPSOL(opti,optionssol);
 
 % extract the optimal solution

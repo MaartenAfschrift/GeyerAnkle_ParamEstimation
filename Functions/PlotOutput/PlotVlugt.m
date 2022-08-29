@@ -26,6 +26,7 @@ if isempty(varargin)
     else
         error('Unkown set of feedback gains');
     end
+    ParamID = [];
 else
     ParamID = varargin{1};
     if strcmp(ParamID,'GeyerDefault')
@@ -48,7 +49,7 @@ end
 nLabels = length(Labels);
 
 
-h = figure();
+h = figure('Name',ParamID);
 image(abs(P),'CDataMapping','scaled');
 set(gca,'CLim',[0 1]);
 colorbar;
@@ -57,6 +58,8 @@ set(gca,'XTick',1:nLabels);
 set(gca,'YTick',1:nLabels);
 set(gca,'XTickLabel',Labels);
 set(gca,'YTickLabel',Labels);
+
+title(['Interdependence parameters: ' ParamID]);
 
 
 delete_box;

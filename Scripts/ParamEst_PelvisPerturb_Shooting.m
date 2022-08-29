@@ -245,21 +245,21 @@ for ib = 1:Batch.N
         Set.ReflexGuess     = [0.02 1.2 0.02 0.4 1 0.2 0.06 -0.1];
         Set.GainsEstimation = 'Geyer_COMd';
         Set.MeshFreq        = 1000;
-        Set.diaryName = fullfile(Set.ResultsFolder,['COMfb_' Set.OutName_Gen '_s_' num2str(s) '.txt']);
+        Set.diaryName = fullfile(Set.ResultsFolder,['COMd_' Set.OutName_Gen '_s_' num2str(s) '.txt']);
         [All_GeyerCOM]      = GainEstimation_AnkleOnly_nCycl_Shooting_vTwente(CombDatSel,Set,RefCycles);
 
         % Default Geyer model + COMd feedback
         Set.ReflexGuess     = [0.02 1.2 0.02 0.4 1 0.2 0.06 -0.1];
         Set.GainsEstimation = 'Geyer_COMd_GRF';
         Set.MeshFreq        = 1000;
-        Set.diaryName       = fullfile(Set.ResultsFolder,['COMfb_' Set.OutName_Gen '_s_' num2str(s) '.txt']);
+        Set.diaryName       = fullfile(Set.ResultsFolder,['COMd_GRF_' Set.OutName_Gen '_s_' num2str(s) '.txt']);
         [All_GeyerCOM_GRF]  = GainEstimation_AnkleOnly_nCycl_Shooting_vTwente(CombDatSel,Set,RefCycles);
 
         % Default Geyer model + COMd feedback
         Set.ReflexGuess     = [1.2 0.02 0.4 1 0.2 0.06 -0.1];
         Set.GainsEstimation = 'Geyer_COMd_GRF_lim';
         Set.MeshFreq        = 1000;
-        Set.diaryName       = fullfile(Set.ResultsFolder,['COMfb_' Set.OutName_Gen '_s_' num2str(s) '.txt']);
+        Set.diaryName       = fullfile(Set.ResultsFolder,['COMd_GRF_lim_' Set.OutName_Gen '_s_' num2str(s) '.txt']);
         Set.Sol.e0          = 0.02;
         [All_GeyerCOM_GRF_lim]  = GainEstimation_AnkleOnly_nCycl_Shooting_vTwente(CombDatSel,Set,RefCycles);
 
