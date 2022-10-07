@@ -14,15 +14,15 @@ function [DataPath] = GetDataVlutters2018()
 [MainPath,~] = fileparts(FuncPath);
 DataPath = fullfile(MainPath,'Data');
 
-if isfolder(DataPath) && isfile(fullfile(DataPath,'pp_1','PertWalk.mat'))
+if isfolder(DataPath) && isfile(fullfile(DataPath,'pp_4','PertWalk.mat'))
     disp('Data was already downloaded');
 else
     if ~isfolder(DataPath)
         mkdir(DataPath);
     end
     % download the executable from google drive
-    disp('Start Downloading vlutters data (320 MB)');
-    LinkZipFile = 'https://www.dropbox.com/s/c0vl9skfo08v7ig/Vlutters2018_ParamID.zip?dl=1';    
+    disp('Start Downloading vlutters data (190 MB)');
+    LinkZipFile = 'https://www.dropbox.com/s/jf7mwcvdofavbpm/Vlutters2018_ParamID.zip.zip?dl=1';    
     websave(fullfile(DataPath,'Vlutters2018_ParamID.zip'),LinkZipFile);
     disp('unzip DataFile');
     unzip(fullfile(DataPath,'Vlutters2018_ParamID.zip'),DataPath);

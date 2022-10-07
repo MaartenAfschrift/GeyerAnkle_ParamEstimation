@@ -12,7 +12,7 @@ MainPath = 'C:\Users\mat950\Documents\Software\Sim\GeyerAnkle_ParamEstimation';
 
 % relative paths
 datapath = fullfile(MainPath,'\Results\ResParamID');
-DataVlutters = fullfile(MainPath,'Data');
+DataVlutters = GetDataVlutters2018(); 
 
 figPath = fullfile(MainPath,'figs','google_docs');
 if ~isfolder(figPath)

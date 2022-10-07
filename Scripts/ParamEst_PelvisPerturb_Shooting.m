@@ -11,7 +11,7 @@ Set.MainPath        = 'C:\Users\Maarten\Documents\Software\Sim\GeyerAnkle_ParamE
 Set.PolyPath        = fullfile(Set.MainPath,'OsimModel\MuscleAnalysis');
 Set.ModelPath       = fullfile(Set.MainPath,'OsimModel\Models','gait_2D_Strength.osim');
 Set.ResultsFolder   = fullfile(Set.MainPath,'Results','ResParamID');
-Set.datapath        = fullfile(Set.MainPath,'Data');    % path with data of Vlutters 2018 organized in format for parameter estimation
+Set.datapath        = GetDataVlutters2018();    % path with data of Vlutters 2018 organized in format for parameter estimation
 
 % add paths
 addpath(genpath(fullfile(Set.MainPath,'Functions')));
@@ -20,8 +20,7 @@ import casadi.*
 % Select Dataset
 Set.TwenteData = 1;   % Boolean for selecting data Twente
 
-% subject IDs5
-% Set.SubjIDs = 5; 
+% subject IDs
 Set.SubjIDs = [4 5 7 8 10];
 
 % Body mass
