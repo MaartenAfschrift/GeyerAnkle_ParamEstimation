@@ -1,6 +1,6 @@
 # Neuromuscular controller parameter estimation
 
-This repository estimates control parameters of a neuromuscular controller to track inverse dynamic moments during steady-state walking and in response to pelvis push and pull perturbations. More details in [ref to publication].
+This repository estimates control parameters of a neuromuscular controller to track inverse dynamic moments during steady-state walking and in response to pelvis push and pull perturbations. More details in Assisting walking balance using a bio-inspired exoskeleton controller" https://doi.org/10.1186/s12984-023-01205-9.
 
 ### Approach
 
